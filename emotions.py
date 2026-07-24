@@ -146,8 +146,29 @@ APOLOGY_FRAMES = [
 ]
 
 # ---------------------------------------------------------
+# ANIMATION SEQUENCES (SURPRISE)
+# ---------------------------------------------------------
+SURPRISE_FRAMES = [
+    # Static base frame (Animation is now purely procedural rotation inside the eyes)
+    FaceState(
+        left_eye=StarEye(w=220, h=270, x_offset=L_X - 40, y_offset=Y_EYE), 
+        right_eye=StarEye(w=220, h=270, x_offset=R_X + 40, y_offset=Y_EYE), 
+        # ĐIỀU CHỈNH VỊ TRÍ MIỆNG Ở ĐÂY:
+        # y_offset: Tăng để miệng hạ thấp xuống, Giảm để nhích lên cao
+        # x_offset: Chỉnh để dịch miệng sang trái/phải nếu cần (Mặc định 0 là chính giữa)
+        mouth=RectMouth(w=150, h=170, y_offset=Y_MOUTH, radius=25), 
+        hold_time=20
+    )
+]
+
+# ---------------------------------------------------------
 # Global Dictionary mapping Folder Names to Sequences
 # ---------------------------------------------------------
+# Chỉnh sửa blush_scale, blush_y, và blush_gap ở ĐÂY cho biểu cảm Confusing
+def get_confusing_eye(is_right=False):
+    x_pos = R_X if is_right else L_X
+    return SpiralEye(x_offset=x_pos, y_offset=Y_EYE, continuous_spin=True, show_blush=True, blush_scale=1.0, blush_y=180, blush_gap=50)
+
 EMOTIONS = {
     "1_Listen-Neutral": FaceSequence(frames=NEUTRAL_FRAMES, loop=True),
     "2_Confirm": FaceSequence(frames=CONFIRM_FRAMES, loop=True),
@@ -161,17 +182,18 @@ EMOTIONS = {
         FaceState(left_eye=NeutralEye(x_offset=L_X + 40, y_offset=Y_EYE, highlights=False), right_eye=NeutralEye(x_offset=R_X + 40, y_offset=Y_EYE, highlights=False), mouth=CapsuleMouth(y_offset=Y_MOUTH), hold_time=40)
     ], loop=True),
     "6_Warning": FaceSequence(frames=[
-        FaceState(left_eye=SpiralEye(rot=0, x_offset=L_X, y_offset=Y_EYE), right_eye=SpiralEye(rot=0, x_offset=R_X, y_offset=Y_EYE), mouth=VerticalMouth(y_offset=Y_MOUTH), hold_time=5),
-        FaceState(left_eye=SpiralEye(rot=45, x_offset=L_X, y_offset=Y_EYE), right_eye=SpiralEye(rot=-45, x_offset=R_X, y_offset=Y_EYE), mouth=VerticalMouth(y_offset=Y_MOUTH), hold_time=5),
-        FaceState(left_eye=SpiralEye(rot=90, x_offset=L_X, y_offset=Y_EYE), right_eye=SpiralEye(rot=-90, x_offset=R_X, y_offset=Y_EYE), mouth=VerticalMouth(y_offset=Y_MOUTH), hold_time=5),
-        FaceState(left_eye=SpiralEye(rot=135, x_offset=L_X, y_offset=Y_EYE), right_eye=SpiralEye(rot=-135, x_offset=R_X, y_offset=Y_EYE), mouth=VerticalMouth(y_offset=Y_MOUTH), hold_time=5)
+        # Confusing/Warning emotion: Spiral runs a full infinite circle, with orange blush!
+        FaceState(
+            left_eye=get_confusing_eye(False), 
+            right_eye=get_confusing_eye(True), 
+            mouth=VerticalMouth(y_offset=Y_MOUTH), 
+            hold_time=20
+        )
     ], loop=True),
     "7_Welcome-when-sefile": FaceSequence(frames=[
-        FaceState(left_eye=StarEye(x_offset=L_X, y_offset=Y_EYE), right_eye=StarEye(x_offset=R_X, y_offset=Y_EYE), mouth=BowlMouth(w=300, h=150, y_offset=Y_MOUTH))
+        FaceState(left_eye=WelcomeEye(x_offset=L_X, y_offset=Y_EYE), right_eye=WelcomeEye(x_offset=R_X, y_offset=Y_EYE), mouth=BowlMouth(w=300, h=150, y_offset=Y_MOUTH))
     ], loop=True),
-    "8_Suprise": FaceSequence(frames=[
-        FaceState(left_eye=StarEye(h=300, x_offset=L_X, y_offset=Y_EYE), right_eye=StarEye(h=300, x_offset=R_X, y_offset=Y_EYE), mouth=BowlMouth(w=100, h=100, y_offset=Y_MOUTH)) # Placeholder
-    ], loop=True),
+    "8_Suprise": FaceSequence(frames=SURPRISE_FRAMES, loop=True),
     "9_Unsure": FaceSequence(frames=[
         FaceState(left_eye=WinkEye(x_offset=L_X, y_offset=Y_EYE), right_eye=NeutralEye(x_offset=R_X, y_offset=Y_EYE), mouth=SquigglyMouth(y_offset=Y_MOUTH)) # Placeholder
     ], loop=True),

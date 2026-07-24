@@ -1,6 +1,6 @@
 import math
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPainterPath, QColor, QLinearGradient, QPen, QGradient
+from PyQt6.QtGui import QPainterPath, QColor, QLinearGradient, QPen, QGradient, QConicalGradient, QBrush
 
 # ---------------------------------------------------------
 # Colors
@@ -118,6 +118,91 @@ class BlinkEye(BaseEye):
         pen = QPen(CYAN_MAIN); pen.setWidth(40); pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         painter.setPen(pen); painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawPath(path)
+
+class WelcomeEye(RoundedEyeFrame):
+    def __init__(self, w=200, h=250, x_offset=-180, y_offset=-100, show_blush=True, blush_scale=1.0, blush_y=180, blush_gap=50):
+        # Mắt mở giống biểu cảm confirm (SparkleEye có w=200, h=250, radius=90)
+        super().__init__(w, h, x_offset, y_offset, radius=90)
+        self.show_blush = show_blush
+        self.blush_scale = blush_scale; self.blush_y = blush_y; self.blush_gap = blush_gap
+    def lerp(self, target, t):
+        return WelcomeEye(self.w + (target.w - self.w)*t, self.h + (target.h - self.h)*t, self.x_offset + (target.x_offset - self.x_offset)*t, self.y_offset + (target.y_offset - self.y_offset)*t, self.show_blush, self.blush_scale + (target.blush_scale - self.blush_scale)*t, self.blush_y + (target.blush_y - self.blush_y)*t, self.blush_gap + (target.blush_gap - self.blush_gap)*t)
+    def draw(self, painter, cx, cy, opacity=1.0):
+        super().draw(painter, cx, cy, opacity)
+        base_x = cx + self.x_offset; base_y = cy + self.y_offset
+        if self.show_blush:
+            bar_w = 12 * self.blush_scale
+            gap = self.blush_gap * self.blush_scale
+            base_heights = [15, 35, 60, 75, 60, 35, 15]
+            painter.setBrush(CYAN_GLOW) # Blush giống happy when talking
+            painter.setPen(Qt.PenStyle.NoPen)
+            start_x = base_x - (gap * 6) / 2
+            for i in range(7):
+                bh = base_heights[i] * self.blush_scale
+                bx = start_x + (i * gap)
+                by = base_y + self.h/2 + self.blush_y - bh/2 
+                painter.drawRoundedRect(int(bx - bar_w/2), int(by), int(bar_w), int(bh), int(bar_w/2), int(bar_w/2))
+    def draw_inner(self, painter, base_x, base_y, opacity):
+        import time
+        painter.save()
+        auto_rot = (time.time() * 120) % 360 # Xoay tại trục tâm
+        painter.translate(base_x, base_y)
+        painter.setBrush(WHITE_SPARKLE); painter.setPen(Qt.PenStyle.NoPen)
+        
+        # Tính toán tọa độ hệt như SparkleEye
+        star_size = 40 
+        sx = -self.w/2 + self.w*0.35; sy = -self.h/2 + self.h*0.35
+        
+        # Vẽ ngôi sao 4 cánh (Thêm animation xoay)
+        painter.save()
+        painter.translate(sx, sy)
+        painter.rotate(auto_rot)
+        path = QPainterPath()
+        path.moveTo(0, -star_size)
+        path.quadTo(0, 0, star_size, 0)
+        path.quadTo(0, 0, 0, star_size)
+        path.quadTo(0, 0, -star_size, 0)
+        path.quadTo(0, 0, 0, -star_size)
+        painter.drawPath(path)
+        painter.restore()
+        
+        # Hình tròn trung tâm được giữ nguyên đặc (Solid)
+        # Tạo thêm viền mờ (Aura/Glow) xung quanh bằng Pen dày
+        # Áp dụng Conical Gradient lên viền mờ để ánh sáng tỏa ra không đều góc
+        c1_w = self.w*0.25; c2_w = self.w*0.12
+        cx1 = -self.w/2 + self.w*0.7; cy1 = -self.h/2 + self.h*0.55
+        cx2 = -self.w/2 + self.w*0.45; cy2 = -self.h/2 + self.h*0.8
+        
+        def draw_spinning_aura_circle(cx, cy, w):
+            painter.save()
+            painter.translate(cx, cy)
+            painter.rotate(auto_rot) # Đã đồng bộ tốc độ xoay bằng với ngôi sao (speed_mult = 1.0)
+            
+            # 1. Vẽ viền mờ (Blur) không đều góc xung quanh
+            grad = QConicalGradient(0, 0, 0)
+            grad.setColorAt(0.0, QColor(255, 255, 255, 100)) # Viền phát sáng mạnh
+            grad.setColorAt(0.5, QColor(255, 255, 255, 0))   # Viền biến mất
+            grad.setColorAt(1.0, QColor(255, 255, 255, 100))
+            
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            grad_brush = QBrush(grad)
+            for i in range(1, 5):
+                pen = QPen(grad_brush, float(i * 3))
+                painter.setPen(pen)
+                # Vẽ viền rộng hơn hình tròn gốc một chút
+                painter.drawEllipse(int(-w/2 - i), int(-w/2 - i), int(w + i*2), int(w + i*2))
+            
+            # 2. Vẽ hình tròn cốt lõi đặc nguyên khối (Không Blur)
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(WHITE_SPARKLE)
+            painter.drawEllipse(int(-w/2), int(-w/2), int(w), int(w))
+            
+            painter.restore()
+            
+        draw_spinning_aura_circle(cx1, cy1, c1_w)
+        draw_spinning_aura_circle(cx2, cy2, c2_w)
+        
+        painter.restore()
 
 class HeartEye(RoundedEyeFrame):
     def __init__(self, w=220, h=270, x_offset=-220, y_offset=-100, heart_scale=1.0, show_blush=False, blush_scale=1.0, blush_y=40, blush_gap=40):
@@ -273,11 +358,13 @@ class CryingEye(BaseEye):
         painter.drawEllipse(int(base_x - self.w*0.3), int(base_y + self.h*0.65), int(self.w*0.15), int(self.w*0.15))
 
 class SpiralEye(RoundedEyeFrame):
-    def __init__(self, w=220, h=180, rot=0, x_offset=-180, y_offset=-100):
+    def __init__(self, w=220, h=180, rot=0, x_offset=-180, y_offset=-100, continuous_spin=False, show_blush=False, blush_scale=1.0, blush_y=40, blush_gap=26):
         super().__init__(w, h, x_offset, y_offset, radius=80)
         self.rot = rot; self.glow_color = ORANGE_GLOW; self.main_color = ORANGE_MAIN
+        self.continuous_spin = continuous_spin; self.show_blush = show_blush
+        self.blush_scale = blush_scale; self.blush_y = blush_y; self.blush_gap = blush_gap
     def lerp(self, target, t):
-        return SpiralEye(self.w + (target.w - self.w)*t, self.h + (target.h - self.h)*t, self.rot + (target.rot - self.rot)*t, self.x_offset + (target.x_offset - self.x_offset)*t, self.y_offset + (target.y_offset - self.y_offset)*t)
+        return SpiralEye(self.w + (target.w - self.w)*t, self.h + (target.h - self.h)*t, self.rot + (target.rot - self.rot)*t, self.x_offset + (target.x_offset - self.x_offset)*t, self.y_offset + (target.y_offset - self.y_offset)*t, self.continuous_spin, self.show_blush, self.blush_scale + (target.blush_scale - self.blush_scale)*t, self.blush_y + (target.blush_y - self.blush_y)*t, self.blush_gap + (target.blush_gap - self.blush_gap)*t)
     def draw_glow(self, painter, path, opacity):
         painter.setBrush(Qt.BrushStyle.NoBrush)
         for i in range(1, 8):
@@ -289,7 +376,10 @@ class SpiralEye(RoundedEyeFrame):
         painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawPath(path)
     def draw_inner(self, painter, base_x, base_y, opacity):
-        painter.translate(base_x, base_y); painter.rotate(self.rot)
+        import time
+        painter.save() # Preserve state before translating/rotating!
+        auto_rot = (time.time() * 250) % 360 if self.continuous_spin else 0
+        painter.translate(base_x, base_y); painter.rotate(self.rot + auto_rot)
         spiral_path = QPainterPath()
         for i in range(100):
             r = i * 0.6; angle = i * 0.2
@@ -299,25 +389,71 @@ class SpiralEye(RoundedEyeFrame):
         pen = QPen(self.main_color)
         pen.setWidth(10); pen.setCapStyle(Qt.PenCapStyle.RoundCap); painter.setPen(pen)
         painter.drawPath(spiral_path)
+        painter.restore()
+        
+    def draw(self, painter, cx, cy, opacity=1.0):
+        super().draw(painter, cx, cy, opacity)
+        base_x = cx + self.x_offset; base_y = cy + self.y_offset
+        if self.show_blush:
+            bar_w = 12 * self.blush_scale
+            gap = self.blush_gap * self.blush_scale
+            base_heights = [15, 35, 60, 75, 60, 35, 15]
+            painter.setBrush(self.glow_color) # Use Confusing tone!
+            painter.setPen(Qt.PenStyle.NoPen)
+            start_x = base_x - (gap * 6) / 2
+            for i in range(7):
+                bh = base_heights[i] * self.blush_scale
+                bx = start_x + (i * gap)
+                by = base_y + self.h/2 + self.blush_y - bh/2 
+                painter.drawRoundedRect(int(bx - bar_w/2), int(by), int(bar_w), int(bh), int(bar_w/2), int(bar_w/2))
 
 class StarEye(RoundedEyeFrame):
     def __init__(self, w=200, h=250, x_offset=-180, y_offset=-100):
-        super().__init__(w, h, x_offset, y_offset, radius=80)
+        # Match HeartEye border radius
+        super().__init__(w, h, x_offset, y_offset, radius=100)
     def lerp(self, target, t):
         return StarEye(self.w + (target.w - self.w)*t, self.h + (target.h - self.h)*t, self.x_offset + (target.x_offset - self.x_offset)*t, self.y_offset + (target.y_offset - self.y_offset)*t)
-    def draw_inner(self, painter, base_x, base_y, opacity):
-        painter.setBrush(WHITE_SPARKLE); painter.setPen(Qt.PenStyle.NoPen)
-        def draw_star(sx, sy, size):
-            path = QPainterPath()
-            path.moveTo(sx, sy - size)
-            path.quadTo(sx, sy, sx + size, sy)
-            path.quadTo(sx, sy, sx, sy + size)
-            path.quadTo(sx, sy, sx - size, sy)
-            path.quadTo(sx, sy, sx, sy - size)
+    def draw_main_frame(self, painter, path, opacity):
+        # Match HeartEye border width (18 instead of 28)
+        painter.setOpacity(opacity); pen = QPen(CYAN_MAIN); pen.setWidth(18)
+        painter.setPen(pen); painter.setBrush(Qt.BrushStyle.NoBrush)
+        painter.drawPath(path)
+    def draw_glow(self, painter, path, opacity):
+        # Match HeartEye glow style
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+        for i in range(1, 10):
+            glow_pen = QPen(CYAN_GLOW); glow_pen.setWidth(18 + i*3)
+            painter.setPen(glow_pen); painter.setOpacity(opacity * (0.08 / i))
             painter.drawPath(path)
-        draw_star(base_x - self.w/2 + self.w*0.35, base_y - self.h/2 + self.h*0.3, 40)
-        draw_star(base_x - self.w/2 + self.w*0.7, base_y - self.h/2 + self.h*0.7, 20)
-        painter.drawEllipse(int(base_x - self.w/2 + self.w*0.2), int(base_y - self.h/2 + self.h*0.6), 30, 30)
+    def draw_inner(self, painter, base_x, base_y, opacity):
+        import time
+        painter.save()
+        auto_rot = (time.time() * 120) % 360 # Spin speed
+        painter.translate(base_x, base_y)
+        
+        # Blue/Cyan stars instead of white
+        painter.setBrush(CYAN_MAIN); painter.setPen(Qt.PenStyle.NoPen)
+        def draw_star(sx, sy, size):
+            painter.save()
+            painter.translate(sx, sy)
+            painter.rotate(auto_rot)
+            path = QPainterPath()
+            path.moveTo(0, -size)
+            path.quadTo(0, 0, size, 0)
+            path.quadTo(0, 0, 0, size)
+            path.quadTo(0, 0, -size, 0)
+            path.quadTo(0, 0, 0, -size)
+            painter.drawPath(path)
+            painter.restore()
+            
+        # Scale sizes up by 25% (45->56, 25->31, 15->19)
+        # Position them in a wide triangle to guarantee they never touch each other 
+        # or the outer border while spinning
+        draw_star(0, -self.h * 0.15, 56)              # Large star (Top center)
+        draw_star(self.w * 0.22, self.h * 0.18, 31)   # Medium star (Bottom Right)
+        draw_star(-self.w * 0.22, self.h * 0.18, 19)  # Small star (Bottom Left)
+        
+        painter.restore()
 
 # ---------------------------------------------------------
 # Modular Mouth Components
@@ -336,6 +472,20 @@ class SmileMouth(FaceComponent):
         path.moveTo(cx - self.w/2, mouth_y)
         path.quadTo(cx, mouth_y + self.curve, cx + self.w/2, mouth_y)
         painter.drawPath(path)
+
+class RectMouth(FaceComponent):
+    def __init__(self, w=150, h=30, y_offset=280, radius=25):
+        self.w = w; self.h = h; self.y_offset = y_offset; self.radius = radius
+    def lerp(self, target, t):
+        return RectMouth(self.w + (target.w - self.w)*t, self.h + (target.h - self.h)*t, self.y_offset + (target.y_offset - self.y_offset)*t, self.radius + (target.radius - self.radius)*t)
+    def draw(self, painter, cx, cy, opacity=1.0):
+        painter.setOpacity(opacity); painter.setPen(Qt.PenStyle.NoPen)
+        mouth_y = cy + self.y_offset
+        grad = QLinearGradient(cx, mouth_y - self.h/2, cx, mouth_y + self.h/2)
+        grad.setColorAt(0, CYAN_GLOW); grad.setColorAt(1, CYAN_MAIN)
+        painter.setBrush(grad)
+        # Center vertically around mouth_y by subtracting h/2, just like VerticalMouth
+        painter.drawRoundedRect(int(cx - self.w/2), int(mouth_y - self.h/2), int(self.w), int(self.h), int(self.radius), int(self.radius))
 
 class CapsuleMouth(FaceComponent):
     def __init__(self, w=150, h=30, y_offset=280):
