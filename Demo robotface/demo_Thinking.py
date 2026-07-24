@@ -12,11 +12,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Danh sách các frame: (Đường dẫn ảnh, Thời gian chờ tính bằng mili-giây)
 # Chỉnh sửa con số ở cuối mỗi dòng để thay đổi tốc độ chuyển cho ĐÚNG frame đó.
 FRAMES_CONFIG = [
-    (os.path.join(BASE_DIR, "../Thinking", "Thinking-1.jpg"), 100),
-    (os.path.join(BASE_DIR, "../Thinking", "Thinking-2.jpg"), 100),
-    (os.path.join(BASE_DIR, "../Thinking", "Thinking-3.jpg"), 100),
-    (os.path.join(BASE_DIR, "../Thinking", "Thinking-4.jpg"), 100),
-    (os.path.join(BASE_DIR, "../Thinking", "Thinking-5.jpg"), 100),
+    (os.path.join(BASE_DIR, "../Thinking", "Thinking-1.jpg"), 250),
+    (os.path.join(BASE_DIR, "../Thinking", "Thinking-2.jpg"), 250),
+    (os.path.join(BASE_DIR, "../Thinking", "Thinking-3.jpg"), 250),
+    (os.path.join(BASE_DIR, "../Thinking", "Thinking-4.jpg"), 250),
+    (os.path.join(BASE_DIR, "../Thinking", "Thinking-5.jpg"), 250),
 ]
 # ==========================================
 

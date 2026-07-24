@@ -12,11 +12,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Danh sách các frame: (Đường dẫn ảnh, Thời gian chờ tính bằng mili-giây)
 # Chỉnh sửa con số ở cuối mỗi dòng để thay đổi tốc độ chuyển cho ĐÚNG frame đó.
 FRAMES_CONFIG = [
-    (os.path.join(BASE_DIR, "../Warning", "warning-1.jpg"), 100),
-    (os.path.join(BASE_DIR, "../Warning", "warning-2.jpg"), 100),
-    (os.path.join(BASE_DIR, "../Warning", "warning-3.jpg"), 100),
-    (os.path.join(BASE_DIR, "../Warning", "warning-4.jpg"), 100),
-    (os.path.join(BASE_DIR, "../Warning", "warning-5.jpg"), 100),
+    (os.path.join(BASE_DIR, "../Warning", "warning-1.jpg"), 150),
+    (os.path.join(BASE_DIR, "../Warning", "warning-2.jpg"), 150),
+    (os.path.join(BASE_DIR, "../Warning", "warning-3.jpg"), 150),
+    (os.path.join(BASE_DIR, "../Warning", "warning-4.jpg"), 150),
+    (os.path.join(BASE_DIR, "../Warning", "warning-5.jpg"), 150),
 ]
 # ==========================================
 

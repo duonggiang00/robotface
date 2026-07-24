@@ -12,13 +12,13 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Danh sách các frame: (Đường dẫn ảnh, Thời gian chờ tính bằng mili-giây)
 # Chỉnh sửa con số ở cuối mỗi dòng để thay đổi tốc độ chuyển cho ĐÚNG frame đó.
 FRAMES_CONFIG = [
-    (os.path.join(BASE_DIR, "../Listen-Neutral", "Listen-neutral-1.jpg"), 100),
-    (os.path.join(BASE_DIR, "../Listen-Neutral", "Listen-neutral-2.jpg"), 100),
-    (os.path.join(BASE_DIR, "../Listen-Neutral", "Listen-neutral-3.jpg"), 100),
-    (os.path.join(BASE_DIR, "../Listen-Neutral", "Listen-neutral-4.jpg"), 100),
-    (os.path.join(BASE_DIR, "../Listen-Neutral", "Listen-neutral-5.jpg"), 100),
-    (os.path.join(BASE_DIR, "../Listen-Neutral", "Listen-neutral-6.jpg"), 100),
-    (os.path.join(BASE_DIR, "../Listen-Neutral", "Listen-neutral-7.jpg"), 100),
+    (os.path.join(BASE_DIR, "../Listen-Neutral", "Listen-neutral-1.jpg"), 250),
+    (os.path.join(BASE_DIR, "../Listen-Neutral", "Listen-neutral-2.jpg"), 250),
+    (os.path.join(BASE_DIR, "../Listen-Neutral", "Listen-neutral-3.jpg"), 250),
+    (os.path.join(BASE_DIR, "../Listen-Neutral", "Listen-neutral-4.jpg"), 180),
+    (os.path.join(BASE_DIR, "../Listen-Neutral", "Listen-neutral-5.jpg"), 500),
+    (os.path.join(BASE_DIR, "../Listen-Neutral", "Listen-neutral-6.jpg"), 250),
+    (os.path.join(BASE_DIR, "../Listen-Neutral", "Listen-neutral-7.jpg"), 250),
 ]
 # ==========================================
 
