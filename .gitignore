@@ -1,2 +1,5 @@
-__pycache__/*.pyc
-__pycache__/*.pyd
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+my_first_robot/
